@@ -1,64 +1,73 @@
 package ru.netology.testmode.test;
 
+import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.Configuration;
+import com.github.javafaker.Faker;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import ru.netology.testmode.data.DataGenerator;
+import ru.netology.testmode.data.Registration;
 
-import static com.codeborne.selenide.Selenide.open;
-import static ru.netology.testmode.data.DataGenerator.Registration.getRegisteredUser;
-import static ru.netology.testmode.data.DataGenerator.Registration.getUser;
-import static ru.netology.testmode.data.DataGenerator.getRandomLogin;
-import static ru.netology.testmode.data.DataGenerator.getRandomPassword;
+
+import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Selectors.withText;
+import static com.codeborne.selenide.Selenide.*;
+
 
 class AuthTest {
+    private static Faker faker;
+    private WebDriver driver;
+
+    @BeforeAll
+    static void setUpAll() {
+        System.setProperty("webdriver.chrome.driver", "C:\\Users\\HP\\Desktop\\TestoviiRezhim\\driver\\win\\chromedriver.exe");
+
+    }
+
 
     @BeforeEach
-    void setup() {
-        open("http://localhost:9999");
+    void setUp() {
+        driver = new ChromeDriver();
+        Configuration.holdBrowserOpen = true;
+        open("http://localhost:9999/");
     }
+
 
     @Test
     @DisplayName("Should successfully login with active registered user")
     void shouldSuccessfulLoginIfRegisteredActiveUser() {
-        var registeredUser = getRegisteredUser("active");
-        // TODO: добавить логику теста, в рамках которого будет выполнена попытка входа в личный кабинет с учётными
-        //  данными зарегистрированного активного пользователя, для заполнения полей формы используйте
-        //  пользователя registeredUser
+        Registration registeredActiveUser = DataGenerator.RegistrationUser.getActiveUser();
+        $("[data-test-id='login'] input").setValue(registeredActiveUser.getLogin()).click();
+        $("[data-test-id='password'] input").setValue(registeredActiveUser.getPassword()).click();
+        $("[data-test-id='action-login'] .button__content").click();
+
+
     }
 
     @Test
     @DisplayName("Should get error message if login with not registered user")
     void shouldGetErrorIfNotRegisteredUser() {
-        var notRegisteredUser = getUser("active");
-        // TODO: добавить логику теста в рамках которого будет выполнена попытка входа в личный кабинет
-        //  незарегистрированного пользователя, для заполнения полей формы используйте пользователя notRegisteredUser
+        var notRegisteredUser = faker.name().fullName();
     }
 
     @Test
     @DisplayName("Should get error message if login with blocked registered user")
     void shouldGetErrorIfBlockedUser() {
-        var blockedUser = getRegisteredUser("blocked");
-        // TODO: добавить логику теста в рамках которого будет выполнена попытка входа в личный кабинет,
-        //  заблокированного пользователя, для заполнения полей формы используйте пользователя blockedUser
+        Registration registeredActiveUser = DataGenerator.RegistrationUser.getBlockedUser();
+        $("[data-test-id='login'] input").setValue(registeredActiveUser.getLogin()).click();
+        $("[data-test-id='password'] input").setValue(registeredActiveUser.getPassword()).click();
+        $("[data-test-id='action-login'] .button__content").click();
+        $(".notification__content").shouldHave(text("Пользователь заблокирован"));
     }
 
     @Test
     @DisplayName("Should get error message if login with wrong login")
     void shouldGetErrorIfWrongLogin() {
-        var registeredUser = getRegisteredUser("active");
-        var wrongLogin = getRandomLogin();
-        // TODO: добавить логику теста в рамках которого будет выполнена попытка входа в личный кабинет с неверным
-        //  логином, для заполнения поля формы "Логин" используйте переменную wrongLogin,
-        //  "Пароль" - пользователя registeredUser
-    }
-
-    @Test
-    @DisplayName("Should get error message if login with wrong password")
-    void shouldGetErrorIfWrongPassword() {
-        var registeredUser = getRegisteredUser("active");
-        var wrongPassword = getRandomPassword();
-        // TODO: добавить логику теста в рамках которого будет выполнена попытка входа в личный кабинет с неверным
-        //  паролем, для заполнения поля формы "Логин" используйте пользователя registeredUser,
-        //  "Пароль" - переменную wrongPassword
+        var registeredUser = DataGenerator.RegistrationUser.getActiveUser();
+        var wrongLogin = faker.letterify("########");
     }
 }

@@ -7,8 +7,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import ru.netology.testmode.data.DataGenerator;
 import ru.netology.testmode.data.Registration;
 
@@ -20,18 +18,9 @@ import static com.codeborne.selenide.Selenide.*;
 
 class AuthTest {
     private static Faker faker;
-    private WebDriver driver;
-
-    @BeforeAll
-    static void setUpAll() {
-        System.setProperty("webdriver.chrome.driver", "C:\\Users\\HP\\Desktop\\TestoviiRezhim\\driver\\win\\chromedriver.exe");
-
-    }
-
 
     @BeforeEach
     void setUp() {
-        driver = new ChromeDriver();
         Configuration.holdBrowserOpen = true;
         open("http://localhost:9999/");
     }

@@ -29,24 +29,27 @@ class AuthTest {
     @Test
     @DisplayName("Should successfully login with active registered user")
     void shouldSuccessfulLoginIfRegisteredActiveUser() {
-        Registration registeredActiveUser = DataGenerator.RegistrationUser.getActiveUser();
+        var registeredActiveUser = DataGenerator.RegistrationUser.getUser("active");
         $("[data-test-id='login'] input").setValue(registeredActiveUser.getLogin()).click();
         $("[data-test-id='password'] input").setValue(registeredActiveUser.getPassword()).click();
         $("[data-test-id='action-login'] .button__content").click();
-
-
+        $("h2").shouldHave(text("Личный кабинет"));
     }
 
     @Test
     @DisplayName("Should get error message if login with not registered user")
     void shouldGetErrorIfNotRegisteredUser() {
-        var notRegisteredUser = faker.name().fullName();
+        var notRegisteredUser = DataGenerator.RegistrationUser.getNotRegisteredUser();
+        $("[data-test-id='login'] input").setValue(notRegisteredUser.getLogin()).click();
+        $("[data-test-id='password'] input").setValue(notRegisteredUser.getPassword()).click();
+        $("[data-test-id='action-login'] .button__content").click();
+        $(".notification__content").shouldHave(text("Неверно указан логин или пароль"));
     }
 
     @Test
     @DisplayName("Should get error message if login with blocked registered user")
     void shouldGetErrorIfBlockedUser() {
-        Registration registeredActiveUser = DataGenerator.RegistrationUser.getBlockedUser();
+        var registeredActiveUser = DataGenerator.RegistrationUser.getUser("blocked");
         $("[data-test-id='login'] input").setValue(registeredActiveUser.getLogin()).click();
         $("[data-test-id='password'] input").setValue(registeredActiveUser.getPassword()).click();
         $("[data-test-id='action-login'] .button__content").click();
@@ -54,9 +57,12 @@ class AuthTest {
     }
 
     @Test
-    @DisplayName("Should get error message if login with wrong login")
+    @DisplayName("Should get error message if login with wrong password")
     void shouldGetErrorIfWrongLogin() {
-        var registeredUser = DataGenerator.RegistrationUser.getActiveUser();
-        var wrongLogin = faker.letterify("########");
+        var registeredUser = DataGenerator.RegistrationUser.getWrongPasswordUser("active");
+        $("[data-test-id='login'] input").setValue(registeredUser.getLogin()).click();
+        $("[data-test-id='password'] input").setValue(registeredUser.getPassword()).click();
+        $("[data-test-id='action-login'] .button__content").click();
+        $(".notification__content").shouldHave(text("Неверно указан логин или пароль"));
     }
 }

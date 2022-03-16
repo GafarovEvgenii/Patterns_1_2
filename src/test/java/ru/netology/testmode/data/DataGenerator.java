@@ -12,6 +12,7 @@ import java.util.Locale;
 import static io.restassured.RestAssured.given;
 
 public class DataGenerator {
+    private static final Faker faker = new Faker(new Locale("en"));
     private static final RequestSpecification requestSpec = new RequestSpecBuilder()
             .setBaseUri("http://localhost")
             .setPort(9999)
@@ -19,7 +20,6 @@ public class DataGenerator {
             .setContentType(ContentType.JSON)
             .log(LogDetail.ALL)
             .build();
-    private static final Faker faker = new Faker(new Locale("en"));
 
     @BeforeAll
     static void makeRequest(Registration registration) {
@@ -44,25 +44,24 @@ public class DataGenerator {
         }
 
         public static String getRandomPassword() {
-            return faker.letterify("########");
+            return faker.internet().password(8, 20);
         }
 
-        public static Registration getActiveUser() {
-            Registration registration = new Registration(getRandomLogin(), getRandomPassword(), "active");
+        public static Registration getUser(String status) {
+            var registration = new Registration(getRandomLogin(), getRandomPassword(), status);
             makeRequest(registration);
             return registration;
         }
 
-        public static Registration getBlockedUser() {
-            Registration registration = new Registration(getRandomLogin(), getRandomPassword(), "blocked");
-            makeRequest(registration);
+        public static Registration getNotRegisteredUser() {
+            var registration = new Registration(getRandomLogin(), getRandomPassword());
             return registration;
         }
 
         public static Registration getWrongPasswordUser(String status) {
             String login = getRandomLogin();
             makeRequest(new Registration(login, getRandomPassword(), status));
-            return new Registration(login, getRandomPassword(), status);
+            return new Registration(login, status);
         }
 
         public static Registration getWrongLoginUser(String status) {
@@ -70,5 +69,6 @@ public class DataGenerator {
             makeRequest(new Registration(getRandomLogin(), password, status));
             return new Registration(getRandomLogin(), password, status);
         }
+
     }
 }
